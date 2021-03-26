@@ -1,0 +1,171 @@
+<html>
+    <meta charset="UTF-8">
+    <title>GBME</title>
+    <style>
+        body {
+            background-color: aliceblue;
+            
+            image-rendering: optimizeSpeed;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+
+        .header-button {
+            display: inline-block;
+            background-color:lightblue;
+            border-color: lightcoral;
+            min-width: 10vw;
+        }
+
+        .window {
+            display: inline-block;
+            border: 3px solid darkslategray;
+        }
+
+        input[type=text] {
+            background-color: darkslateblue;
+            border: 3px solid black;
+            color:aliceblue;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        input[type=number] {
+            background-color: darkslateblue;
+            border-radius: 5px;
+            color:aliceblue;
+            padding: 5px 1px 5px 1px;
+        }
+
+        #settingsDiv {
+            width: 90%;
+            background-color: dodgerblue;
+            z-index: 3;
+            display:none;
+            position: absolute;
+            top: 5%;
+            padding: 0px 5px 5px 5px;
+            border: darkgray solid 3px;
+        }
+        
+        #mapExportDiv {
+            width: 90%;
+            border: darkgray solid 3px;
+            border-radius: 8px;
+            background-color: dodgerblue;
+            position: absolute;
+            z-index: 3;
+            display: none;
+            min-width: 40%;
+            top: 5%;
+            padding: 0px 5px 5px 5px;
+        }
+
+        .x-btn {
+            background-color: red;
+            border:saddlebrown solid 2px;
+            display: inline-block;
+            position: absolute;
+            right: 0px;
+            left: auto;
+        }
+
+        .x-btn:hover {
+            background-color: firebrick;
+        }
+
+        .save-btn {
+            background-color: lawngreen;
+            
+        }
+    </style>
+
+    <body>
+        <!-- Header -->
+        <div style="width: 100%; padding-bottom: 5px;">
+            <button class="header-button" type="button">Load Map</button>
+            <button class="header-button" type="button">Save Map</button>
+            <button onclick="Map.openExportMap();" class="header-button" type="button">Export Map</button>
+            <button onclick="document.getElementById('loadTileSet').click()" class="header-button" type="file" accept=".jpg .png">Load Tileset</button>
+            <button onclick="Map.openSettings()" class="header-button" type="button">Settings</button>
+            <input id="loadTileSet" type="file" accept="image/*" style="display: none;">
+        </div>
+
+        <!-- Main editor -->
+        <div id="mainMapDiv" style="width: fit-content; display: inline;">
+            <a>Map</a><br>
+            <div id="canvasDiv" class="window" style="width: 50%;">
+                <canvas style="width: 100%;" id="canvas">
+            </div>
+            <div id="mapMouse" style="opacity: 0.8; z-index: 1; position:absolute; background:goldenrod;"></div>
+        </div>
+
+        <!-- Tiles -->
+        <div id="mainTileDiv" style="float: right; width: 45%; height: fit-content;">
+            <a>Tileset</a><br>
+            <canvas id="previewTile" class="window" style="float:left"></canvas>
+            <div id="tilesDiv" class="window" style="width:100%">
+                <canvas style="width: 100%;" id="tileCanvas">
+            </div>
+            <div id="tileMouse" style="opacity: 0.5; z-index: 1; position: absolute; background-color: dodgerblue;"></div>
+        </div>
+
+        <!-- Settings menu -->
+        <div id="settingsDiv">
+            <button class="x-btn" onclick="this.parentNode.style.display='none';">&times;</button><br>
+            <h3>Map Properties</h3>
+            <input onclick="Map.setBorderStyle(this.checked)" type="checkbox" id="mapShowBorder" name="mapShowBorder" checked>
+            <label for="mapShowBorder">Show map borders</label>
+
+            <br><label for="mapWidth">Map Width</label>
+            <input type="number" id="mapWidth" value="10" min="2">
+            <br><label for="mapHeight">Map height</label>
+            <input type="number" id="mapHeight" value="10" min="2">
+            <button onclick="Map.newMap(document.getElementById('mapWidth').value, document.getElementById('mapHeight').value)">Update Map</button>
+        </div>
+        
+        <!-- Export map (.c & .h files) -->
+        <div id="mapExportDiv">
+            <button class="x-btn" onclick="this.parentNode.style.display='none';">&times;</button>
+            <h3>Export Map as C file</h3>
+            <label for="mapFileName"><b>File name</b></label>
+            <input id="mapFileName" type="text" value="mapData.c"><br>
+            <label for="mapFileName"><b>Map name</b></label>
+            <input id="mapMapName" minlength="1" type="text" value="MAP_DATA"><br>
+            <br>
+            <label for="mapTileOffset">Starting tile offset:</label>
+            <input id="mapTileOffset" type="number" min="0" style="max-width: 30px;">
+            <button class="save-btn" onclick="Map.requestCDownload()">Download .c file</button>
+            <button class="save-btn" onclick="Map.requestHeaderDownload()">Download .h file</button>
+            
+            <a id="aref" style="display: none;"></a>
+        </div>
+    </body>
+    <script src="src/map.js"></script>
+    <script src="src/tileset.js"></script>
+    <script>
+        function loadTileSet(event)
+        {
+            var file = event.target.files[0];
+            if(!file)
+            return;
+            
+            let reader = new FileReader();
+            
+            reader.onload = function(e)
+            {
+                const contents = e.target.result;
+                Tileset.init(contents, 8);
+            }
+            
+            reader.readAsDataURL(file);
+        }
+        
+        document.getElementById('loadTileSet')
+        .addEventListener('change', loadTileSet, false);
+        
+        Map.init();
+        Map.newMap(10, 10);
+    </script>
+</html>
