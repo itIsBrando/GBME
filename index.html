@@ -84,12 +84,13 @@
     <body>
         <!-- Header -->
         <div style="width: 100%; padding-bottom: 5px;">
-            <button class="header-button" type="button">Load Map</button>
-            <button class="header-button" type="button">Save Map</button>
+            <button onclick="document.getElementById('loadMap').click();" class="header-button" type="button">Load Map</button>
+            <button onclick="Map.requestMapDownload();" class="header-button" type="button">Save Map</button>
             <button onclick="Map.openExportMap();" class="header-button" type="button">Export Map</button>
             <button onclick="document.getElementById('loadTileSet').click()" class="header-button" type="file" accept=".jpg .png">Load Tileset</button>
             <button onclick="Map.openSettings()" class="header-button" type="button">Settings</button>
             <input id="loadTileSet" type="file" accept="image/*" style="display: none;">
+            <input id="loadMap" type="file" accept="*.txt *.json" style="display: none;">
         </div>
 
         <!-- Main editor -->
@@ -135,7 +136,7 @@
             <input id="mapMapName" minlength="1" type="text" value="MAP_DATA"><br>
             <br>
             <label for="mapTileOffset">Starting tile offset:</label>
-            <input id="mapTileOffset" type="number" min="0" style="max-width: 30px;">
+            <input id="mapTileOffset" type="number" min="0" value="0"style="max-width: 60px;"><br>
             <button class="save-btn" onclick="Map.requestCDownload()">Download .c file</button>
             <button class="save-btn" onclick="Map.requestHeaderDownload()">Download .h file</button>
             
@@ -164,6 +165,9 @@
         
         document.getElementById('loadTileSet')
         .addEventListener('change', loadTileSet, false);
+        
+        document.getElementById('loadMap')
+        .addEventListener('change', Map.loadMap, false);
         
         Map.init();
         Map.newMap(10, 10);

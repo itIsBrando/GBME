@@ -62,17 +62,13 @@ var Map = new function()
      */
     this.drawMap = function()
     {
-        if(!this.tilesetLoaded)
+        if(!isTilesetLoaded)
             return;
         
         for(let y = 0; y < this.height; y++)
-        {
             for(let x = 0; x < this.width; x++)
-            {
                 this.writeTileAt(x, y, this.mapBuffer[x + y * this.width], true);
-            }
-        }
-;
+
     }
 
 
@@ -271,17 +267,97 @@ var Map = new function()
         a.setAttribute('download', fileName);
 
         let txt = "#define " + sizeVarName + " " + (this.mapBuffer.length)
-         + "\nunsigned char " 
+         + "\n#define " + dataName + "_WIDTH " + (this.width)
+         + "\n#define " + dataName + "_HEIGHT " + (this.height)
+         + "\n\nunsigned char " 
          + dataName + "[" + sizeVarName + "] = "
          + JSON.stringify(this.mapBuffer).replace('[', '{').replace(']', '}')
          + ";";
 
-         a.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(txt));
-         a.click();
+        a.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(txt));
+        a.click();
 
 
         for(let i = 0; i < this.mapBuffer.length; i++)
             this.mapBuffer[i] -= tileOffset;
 
+    }
+
+    
+    /**
+     * Save a map file
+     */
+    this.requestMapDownload = function()
+    {
+        const filename = "map.txt";
+        const a = document.getElementById('aref');
+
+        const map = new MapSave(this.mapBuffer, this.width, this.height);
+        map.includeTileset();
+
+        let data = JSON.stringify(map);
+
+        a.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(data));
+        a.setAttribute("download", filename);
+
+        a.click();
+    }
+
+
+    this.loadMap = function(event)
+    {
+        var file = event.target.files[0];
+        if(!file)
+        return;
+        
+        let reader = new FileReader();
+        
+        reader.onload = function(e)
+        {
+            const contents = e.target.result;
+            const map = JSON.parse(contents);
+            if(map.tileset)
+            {
+                Tileset.init(map.tileset, 8);
+                console.log("load tilemap");
+                console.log(isTilesetLoaded);
+            }
+            
+            Map.newMap(map.width, map.height);
+            Map.mapBuffer = map.buffer;
+            // try to draw if we loaded a map with a tileset
+            if(map.tileset)
+                waitTilRedraw();
+        }
+        
+        reader.readAsText(file);
+    }
+
+}
+
+function waitTilRedraw()
+{
+    if(!isTilesetLoaded)
+    {
+        setTimeout(waitTilRedraw, 400);
+        return;
+    }
+
+    Map.drawMap();
+}
+
+
+class MapSave {
+    constructor(data, width, height)
+    {
+        this.width  = width;
+        this.height = height;
+        this.buffer = data;
+        this.tileset= null;
+    }
+
+    includeTileset()
+    {
+        this.tileset = Tileset.getCanvas().toDataURL("image/png").replace("image/png", "image/octet-stream");
     }
 }

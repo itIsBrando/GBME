@@ -1,3 +1,5 @@
+var isTilesetLoaded = false;
+
 var Tileset = new function()
 {
     const canvas = document.getElementById('tileCanvas');
@@ -25,12 +27,14 @@ var Tileset = new function()
             Tileset.tileRows   = Math.floor(image.width / tileSize);
             Tileset.tileColumns= Math.floor(image.height / tileSize);
             Tileset.tileSize = tileSize;
-
+            
             canvas.width = Tileset.tileRows * tileSize;
             canvas.height = Tileset.tileColumns * tileSize;
             context.drawImage(image, 0, 0);
             
             Tileset.updateActiveTile();
+            isTilesetLoaded = true;
+            Map.tilesetLoaded = true;
         };
 
         this.previewCanvas.width = tileSize;
@@ -38,7 +42,6 @@ var Tileset = new function()
         this.previewCanvas.height = tileSize;
 
         this.mouseInit();
-        Map.tilesetLoaded = true;
     }
     
 
@@ -100,5 +103,10 @@ var Tileset = new function()
             Tileset.updateActiveTile();
         }
         
+    }
+
+    this.getCanvas = function()
+    {
+        return canvas;
     }
 }
